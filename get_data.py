@@ -53,7 +53,7 @@ for a in act:
     #for line in open("small_file.txt"):
         if a in line:
 	    print line
-	    filename = name+str(i)+'.'+line.split()[4].split('.')[-1]
+	    filename = name+"_" +str(i)+'.'+line.split()[4].split('.')[-1]
 	    #A version without timeout (uncomment in case you need to 
             #unsupress exceptions, which timeout() does)
             #testfile.retrieve(line.split()[4], "uncropped/"+filename)
