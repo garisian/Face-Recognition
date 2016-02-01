@@ -19,7 +19,7 @@ from scipy.ndimage import filters
 import urllib
 import math
 
-def predict(list_of_neighbours):
+def predict_actor_ress(list_of_neighbours):
     '''
     list_of_neighbours contains a list of nearest elements to k. Since we are attempting to predict the type
     of actor, we can simply search for the maxium actor occurance in the list and take that to be the actor. 
@@ -29,11 +29,15 @@ def predict(list_of_neighbours):
     for neighbour in list_of_neighbours:
 
         predicted[neighbour-1] = predicted[neighbour-1] + 1
-    #print list_of_neighbours
-    #print predicted.index(max(predicted))+1
-    #print "-----------"
     return predicted.index(max(predicted)) + 1
 
+def predict_gender(list_of_neighbours):
+    predicted = [0,0]
+    #print list_of_neighbours
+    for neighbour in list_of_neighbours:
+        
+        predicted[neighbour] = predicted[neighbour]+1
+    return predicted.index(max(predicted))
 
 def k_neighbours(point, list_of_elements, k):
     '''
@@ -89,22 +93,9 @@ def transform_info(trainingSet, testSet, validationSet):
     return trainingSet,testSet,validationSet
 
 def distance_get(a,b):
-    #mat_a = a.flatten()
-    #mat_b = b.flatten()
-    #print np.array(a[0]) - np.array(b[0])
-    #print "----" 
     math_sum = (np.array(a[0])-np.array(b[0]))**2
-    #print math.sqrt(math_sum.sum())
     return math.sqrt(math_sum.sum())  
-    #a_square = np.sum(np.array(a[0])**2)
-    #b_square = np.sum(np.array(b[0])**2)
-    #ab = np.sum(np.array(a[0]) *  np.array(b[0]))
-    #print a_square 
-    #print b_square
-    #print int(a_square) + int(b_square) - int(ab)
-    #print abs(a_square - b_square)
-    #print ab
-    #return math.sqrt(int(a_square) + int(b_square) - int(ab))
+
 
 def eculideanDistance(set1, set2):
     '''
@@ -118,11 +109,76 @@ def eculideanDistance(set1, set2):
     aa = np.sum(a**2, axis=0)
     bb = np.sum(b**2, axis=0)
     ab = np.dot(a.T, b)
-    #print aa
-    #print bb
-    #print ab
     return np.sqrt(aa[:, np.newaxis] + bb[np.newaxis, :] - 2*ab)
-    #return np.sqrt(aa + bb - 2*ab)
+
+
+def get_data_gender(filename, trainingSet, testSet, validationSet, person_mapping):
+    '''
+    This function looks inside the cropped images directory and constructs two lists. First list contains the images 
+    while the second list contains what actor/actress it is. The following are the values for each actor/actress:
+
+    '''
+
+    # Make a empty set for each of the 6 categories which will be filled in later
+    fullSet = {}
+    for num in range(0,2):
+        trainingSet[num] = []
+        testSet[num] = []
+    	validationSet[num] = []
+#{"butler":0, "radcliffe":1, "vartan":2, "bracco":3, "gilpin":4, "harmon":5}    
+    # Take each cropped image and grey scale it and then change its size to 32 by 32
+    for image_name in os.listdir(filename):
+        image = imread(filename+"/"+image_name)
+	value = actor_actress_value(image_name, person_mapping)
+        name = image_name.split("_")
+        if(name[1] in ["butler","radcliffe","vartan","bracco","gilpin","harmon"]):
+            #print validationSet
+            if(len(validationSet[value]) < 10):
+                validationSet[value].append(image)
+            else:
+                trainingSet[value].append(image)
+        else:
+            testSet[value].append(image)
+    return trainingSet, validationSet, testSet       
+ 
+
+
+def get_data_mini_gender(filename, trainingSet, testSet, validationSet, person_mapping):
+    '''
+    This function looks inside the cropped images directory and constructs two lists. First list contains the images 
+    while the second list contains what actor/actress it is. The following are the values for each actor/actress:
+    Gerard Butler        = 1
+    Daniel Radcliffe     = 2
+    Michael Vartan       = 3
+    Lorraine Bracco      = 4 
+    Peri Gilpin          = 5
+    Angie Harmon         = 6
+    '''
+
+    # Make a empty set for each of the 6 categories which will be filled in later
+    fullSet = {}
+    for num in range(0,2):
+        trainingSet[num] = []
+        testSet[num] = []
+        validationSet[num] = []
+    	fullSet[num] = []
+    training_needed = 90
+    test_needed = 10
+    validation_needed = 10
+    
+    # Take each cropped image and grey scale it and then change its size to 32 by 32
+    for image_name in os.listdir(filename):
+        image = imread(filename+"/"+image_name)
+	value = actor_actress_value(image_name, person_mapping)
+        if(value != 999):
+            fullSet[value].append(image)
+    
+    # Populate the training, test, and validation sets but don't overlap any elements
+    for num in range(0,2):
+        trainingSet[num] = fullSet[num][0:training_needed]
+        testSet[num] = fullSet[num][training_needed:training_needed+test_needed]
+        validationSet[num] = fullSet[num][training_needed+test_needed:training_needed+test_needed+validation_needed]
+    return trainingSet, validationSet, testSet 
 
 
 def get_data(filename, trainingSet, testSet, validationSet, person_mapping):
@@ -151,19 +207,19 @@ def get_data(filename, trainingSet, testSet, validationSet, person_mapping):
     # Take each cropped image and grey scale it and then change its size to 32 by 32
     for image_name in os.listdir(filename):
         image = imread(filename+"/"+image_name)
-	#grey_image = rgb2gray(image)
-	#grey_32 = imresize(grey_image, (32,32))
 	value = actor_actress_value(image_name, person_mapping)
- 	#print value
- 	#print image
-        fullSet[value].append(image)
-#	imshow(grey_32) 
+        if(value != 999):
+            fullSet[value].append(image)
     
     # Populate the training, test, and validation sets but don't overlap any elements
     for num in range(0,6):
         trainingSet[num] = fullSet[num][0:training_needed]
         testSet[num] = fullSet[num][training_needed:training_needed+test_needed]
         validationSet[num] = fullSet[num][training_needed+test_needed:training_needed+test_needed+validation_needed]
+        #print num
+        #print len(testSet[num])
+        #print len(trainingSet[num])
+        #print len(validationSet[num])
 	
 def actor_actress_value(file_name, person_mapping):
     '''
@@ -171,7 +227,10 @@ def actor_actress_value(file_name, person_mapping):
     '''  
     elements = file_name.split("_")
     #print file_name + "    " + str(person_mapping[elements[1]])
-    return person_mapping[elements[1]]
+    if(elements[1] in person_mapping.keys()):
+        return person_mapping[elements[1]]
+    #print file_name    
+    return 999
  
 def rgb2gray(rgb):
     '''
