@@ -20,8 +20,16 @@ if __name__ == "__main__":
     testSet = {}
     validationSet = {}
 
+    # Create two lsits. First list will be used to facial recognition for the 6 actors/actress' while the gender
+    # mapping has a hardcoded gender for each of the recepients and that will be used for gender classification
     person_mapping = {"butler":0, "radcliffe":1, "vartan":2, "bracco":3, "gilpin":4, "harmon":5}
-    dir_of_cropped = os.getcwd()+"/cropped"
+    gender_mapping = {"richter":1,"elwes":2,"dlein":3,"noth":4,"radcliffe":5,"dourdan":6,"butler":7,
+                      "statham":8,"smith":9,"diCaprio":10,"long":11,"gray":12,"vartan":13,"walker":14,
+                      "madden":15,"anderson":16,"bracco":17,"cattrall":18,"marie":19,"conn":20,"delany":21,
+                      "electra":22,"gilpin":23,"harmon":24,"hartley":25,"hatcher":26,"innes":27,"louis-Dreyfus":28,
+                      "marcil":29,"meyer":30}
+    
+    dir_of_cropped = os.getcwd()+"/cropped2"
     get_data(dir_of_cropped, trainingSet, testSet, validationSet, person_mapping)
     
     successful_count = 0
@@ -36,7 +44,7 @@ if __name__ == "__main__":
     #print len(trainingSet)
     total_correct = 0
     total_tried = 0
-    for i in range(1,40):
+    for i in range(1,20):
     
         for test_case in testSet:
             #imshow(test_case)
@@ -47,6 +55,7 @@ if __name__ == "__main__":
             #nearest_neighbours.reverse()
             predicted_type = predict(nearest_neighbours)
             #print "PREDICTED:  "+str(predicted_type) + "ACTUAL " + str(test_case[1])
+
 	
 	    if(predicted_type == test_case[1]):
                 successful_count +=1
