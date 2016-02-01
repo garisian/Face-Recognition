@@ -14,9 +14,8 @@ from scipy.ndimage import filters
 import urllib
 from hashlib import sha256
 
-act = list(set([a.split("\t")[0] for a in open("subset_actors.txt").readlines()]))
-#act = ['Gerard Butler','Daniel Radcliffe','Michael Vartan','Lorraine Bracco','Peri Gilpin','Angie Harmon']
-
+#act = list(set([a.split("\t")[0] for a in open("faces_subset.txt").readlines()]))
+act = ['Matthew Gray Gubler', 'Holly Marie Combs']
 
 
 def rgb2gray(rgb):
@@ -70,12 +69,12 @@ for a in act:
     for line in open("faces_subset.txt"):
         if a in line:
 	  
-	    filename = name+"_" +str(i)+'.'+line.split()[4].split('.')[-1]
+	    filename = name+"_" +str(i)+'.'+line.split()[5].split('.')[-1]
 	    #A version without timeout (uncomment in case you need to 
             #unsupress exceptions, which timeout() does)
             #testfile.retrieve(line.split()[4], "uncropped/"+filename)
             #timeout is used to stop downloading images which take too long to download
-            timeout(testfile.retrieve, (line.split()[4], "uncropped2/"+filename), {}, 30)
+            timeout(testfile.retrieve, (line.split()[5], "uncropped2/"+filename), {}, 30)
  
  	    if not os.path.isfile("uncropped2/"+filename):
                 continue      
@@ -83,8 +82,8 @@ for a in act:
  	    # Hexa value was calculated to make sure no files were broken. If a file is broken, the part of the 
             # script that extracts it and does a grayscale with 32x32 will break and crash the code. This check
             # eliminates all possibilities of crashing.
-	    line_parsed = line.split()[5].split(',');
-            hexa_thing = line.split()[6];
+	    line_parsed = line.split()[6].split(',');
+            hexa_thing = line.split()[7];
 	    file_hexa =  sha256(open("uncropped2/"+filename).read()).hexdigest()
             
             if(file_hexa != hexa_thing):
