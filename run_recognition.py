@@ -20,15 +20,38 @@ if __name__ == "__main__":
     testSet = {}
     validationSet = {}
 
-    person_mapping = {"butler":1, "radcliffe":2, "vartan":3, "bracco":4, "gilpin":5, "harmon":6}
+    person_mapping = {"butler":0, "radcliffe":1, "vartan":2, "bracco":3, "gilpin":4, "harmon":5}
     dir_of_cropped = os.getcwd()+"/cropped"
     get_data(dir_of_cropped, trainingSet, testSet, validationSet, person_mapping)
     
-    count = 1
+    successful_count = 0
+    total_count = 0
     #print len(testSet[1])
     #print len(trainingSet[1])
     #print len(validationSet[1])
-    transformed_info = transform_info(trainingSet, testSet, validationSet)
-    #for category in testSet:
-    #    for image in testSet[category]:
-            
+    trainingSet, testSet, validationSet = transform_info(trainingSet, testSet, validationSet)
+      
+    #print len(testSet)
+    #print len(validationSet)
+    #print len(trainingSet)
+    total_correct = 0
+    total_tried = 0
+    for i in range(1,40):
+    
+        for test_case in testSet:
+            #imshow(test_case)
+            nearest_neighbours, lengths = k_neighbours(test_case, trainingSet, i)
+            #print lengths
+            #print nearest_neighbours
+            nearest_neighbours.sort()
+            #nearest_neighbours.reverse()
+            predicted_type = predict(nearest_neighbours)
+            #print "PREDICTED:  "+str(predicted_type) + "ACTUAL " + str(test_case[1])
+	
+	    if(predicted_type == test_case[1]):
+                successful_count +=1
+            total_count+=1
+        print "for "+str(i) +" as k, we got " + str(successful_count) + " out of " + str(total_count)
+
+        successful_count = 0
+        total_count = 0
