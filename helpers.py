@@ -139,26 +139,28 @@ def get_data(filename, trainingSet, testSet, validationSet, person_mapping):
 
     # Make a empty set for each of the 6 categories which will be filled in later
     fullSet = {}
-    for num in range(1,7):
+    for num in range(0,6):
         trainingSet[num] = []
         testSet[num] = []
         validationSet[num] = []
     	fullSet[num] = []
-    training_needed = 100
+    training_needed = 90
     test_needed = 10
     validation_needed = 10
     
     # Take each cropped image and grey scale it and then change its size to 32 by 32
     for image_name in os.listdir(filename):
         image = imread(filename+"/"+image_name)
-	grey_image = rgb2gray(image)
-	grey_32 = imresize(grey_image, (32,32))
+	#grey_image = rgb2gray(image)
+	#grey_32 = imresize(grey_image, (32,32))
 	value = actor_actress_value(image_name, person_mapping)
-        fullSet[value].append(grey_32)
+ 	#print value
+ 	#print image
+        fullSet[value].append(image)
 #	imshow(grey_32) 
-
+    
     # Populate the training, test, and validation sets but don't overlap any elements
-    for num in range(1,7):
+    for num in range(0,6):
         trainingSet[num] = fullSet[num][0:training_needed]
         testSet[num] = fullSet[num][training_needed:training_needed+test_needed]
         validationSet[num] = fullSet[num][training_needed+test_needed:training_needed+test_needed+validation_needed]
