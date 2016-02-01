@@ -14,8 +14,8 @@ from scipy.ndimage import filters
 import urllib
 from hashlib import sha256
 
-#act = list(set([a.split("\t")[0] for a in open("subset_actors.txt").readlines()]))
-act = ['Gerard Butler','Daniel Radcliffe','Michael Vartan','Lorraine Bracco','Peri Gilpin','Angie Harmon']
+act = list(set([a.split("\t")[0] for a in open("subset_actors.txt").readlines()]))
+#act = ['Gerard Butler','Daniel Radcliffe','Michael Vartan','Lorraine Bracco','Peri Gilpin','Angie Harmon']
 
 
 
@@ -68,9 +68,8 @@ for a in act:
     i = 0
     error = ""
     for line in open("faces_subset.txt"):
-    #for line in open("small_file.txt"):
         if a in line:
-	    #print line
+	  
 	    filename = name+"_" +str(i)+'.'+line.split()[4].split('.')[-1]
 	    #A version without timeout (uncomment in case you need to 
             #unsupress exceptions, which timeout() does)
@@ -79,47 +78,26 @@ for a in act:
             timeout(testfile.retrieve, (line.split()[4], "uncropped2/"+filename), {}, 30)
  
  	    if not os.path.isfile("uncropped2/"+filename):
-                continue           
-#	    print filename
+                continue      
+
+ 	    # Hexa value was calculated to make sure no files were broken. If a file is broken, the part of the 
+            # script that extracts it and does a grayscale with 32x32 will break and crash the code. This check
+            # eliminates all possibilities of crashing.
 	    line_parsed = line.split()[5].split(',');
-	   
             hexa_thing = line.split()[6];
 	    file_hexa =  sha256(open("uncropped2/"+filename).read()).hexdigest()
-            #file_hexa = sha256("uncropped2/"+filename).hexdigest()
- 	    
-#            print file_hexa
- #           print hexa_thing
-  #          print "__________"
             
             if(file_hexa != hexa_thing):
                 continue
  	    
+            # This part ofthe code extracts the verified image and crops the image based on the coordinates given in  
+            # the faces_subet file and then grey scales and resizes to 32 by 32 in that order. Modified images are 
+            # placed in a new folder called cropped2/. 
             ids = imread("uncropped2/"+filename)
-#            print line_parsed
-#	    if(ids.shape == (1,1)):
-#		error += line + "\n"
-#		continue
-#	    cropped_image = ids[int(line_parsed[0]):int(line_parsed[2]),int(line_parsed[1]):int(line_parsed[3]),];            
             cropped_image = ids[int(line_parsed[1]):int(line_parsed[3]),int(line_parsed[0]):int(line_parsed[2]),]; 
 	    grey_image = rgb2gray(cropped_image) 
             grey_32 = imresize(grey_image, (32,32))
             imsave('cropped2/modified_'+filename,grey_32);
             print 'cropped2/modifiend_'+filename+' is SUCCESSFUL';
-#	    try:
-#                #read each picture and crop it based on the values stated in "line
-#              ids = imread("uncropped/"+filename)
-#                #print ids.shape
-#                #print line            
-#                print filename + " successfully put into uncropped"
-#                #print ids
-#                line_parsed = line.split()[5].split(',')
-#                #print line_parsed
-#                #print ids.shape
-#                cropped_image = ids[int(line_parsed[0]):int(line_parsed[2]),int(line_parsed[1]):int(line_parsed[3]),];
-#                imsave('cropped/modified_'+filename,cropped_image);
-#                #print line_parsed
-#                print 'cropped/modified_'+filename +" successfully put into cropped"  
-#	    except:
-#  		print 'cropped/modified_'+filename + " FAILED TO BE CROPPED"
             i += 1
 
